@@ -22,7 +22,6 @@ use std::sync::mpsc::Receiver;
 use crate::consensus::service::Service;
 
 /// An update from the validator
-#[derive(Debug)]
 #[allow(clippy::large_enum_variant)]
 pub enum Update {
     PeerConnected(PeerInfo),
@@ -33,6 +32,37 @@ pub enum Update {
     BlockInvalid(BlockId),
     BlockCommit(BlockId),
     Shutdown,
+}
+
+impl fmt::Debug for Update {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::PeerConnected(arg0) => f.debug_tuple("PeerConnected").field(arg0).finish(),
+            Self::PeerDisconnected(arg0) => f
+                .debug_tuple("PeerDisconnected")
+                .field(&hex::encode(arg0))
+                .finish(),
+            Self::PeerMessage(arg0, arg1) => f
+                .debug_tuple("PeerMessage")
+                .field(arg0)
+                .field(&hex::encode(arg1))
+                .finish(),
+            Self::BlockNew(arg0) => f.debug_tuple("BlockNew").field(arg0).finish(),
+            Self::BlockValid(arg0) => f
+                .debug_tuple("BlockValid")
+                .field(&hex::encode(arg0))
+                .finish(),
+            Self::BlockInvalid(arg0) => f
+                .debug_tuple("BlockInvalid")
+                .field(&hex::encode(arg0))
+                .finish(),
+            Self::BlockCommit(arg0) => f
+                .debug_tuple("BlockCommit")
+                .field(&hex::encode(arg0))
+                .finish(),
+            Self::Shutdown => write!(f, "Shutdown"),
+        }
+    }
 }
 
 pub type BlockId = Vec<u8>;
@@ -331,5 +361,19 @@ pub mod tests {
             }
         }
         false
+    }
+
+    macro_rules! update_vec_fields {
+    () => {};
+    ($($updates:ident),*) => {{
+        $(println!(stringify!($updates));)*
+        $(assert_eq!(format!("{:?}", Update::$updates(vec![255])), format!(r#"{}("ff")"#,stringify!($updates)));)*
+    }
+    };
+  }
+
+    #[test]
+    fn update_manual_debug_impl() {
+        update_vec_fields!(PeerDisconnected, BlockValid, BlockInvalid, BlockCommit);
     }
 }
