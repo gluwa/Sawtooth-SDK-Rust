@@ -262,11 +262,13 @@ impl SendReceiveStream {
             ];
             zmq::poll(&mut poll_items, POLL_TIMEOUT).unwrap();
             if poll_items[0].is_readable() {
+                #[cfg(feature = "log-zmq-stream")]
                 trace!("Readable!");
                 let mut received_parts = self.socket.recv_multipart(0).unwrap();
 
                 // Grab the last part, which should contain our message
                 if let Some(received_bytes) = received_parts.pop() {
+                    #[cfg(feature = "log-zmq-stream")]
                     trace!("Received {} bytes", received_bytes.len());
                     if !received_bytes.is_empty() {
                         let message = protobuf::Message::parse_from_bytes(&received_bytes).unwrap();
@@ -290,6 +292,7 @@ impl SendReceiveStream {
             {
                 Ok(SocketCommand::Send(msg)) => {
                     let message_bytes = protobuf::Message::write_to_bytes(&msg).unwrap();
+                    #[cfg(feature = "log-zmq-stream")]
                     trace!("Sending {} bytes", message_bytes.len());
                     self.socket.send(&message_bytes, 0).unwrap();
                 }

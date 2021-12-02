@@ -27,7 +27,7 @@ documentation = "https://sawtooth.hyperledger.org/docs/core/releases/latest/"
 edition = "2018"
 
 [features]
-default = ["pem"]
+default = ["pem", "log-zmq-stream"]
 
 stable = ["default"]
 
@@ -42,6 +42,7 @@ vendored-zmq = ["zmq/vendored"]
 vendored-openssl = ["openssl/vendored"]
 
 old-sawtooth = []
+log-zmq-stream = []
 
 [dependencies]
 hex = "0.4"
